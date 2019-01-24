@@ -217,4 +217,7 @@ source "drivers/tee/Kconfig"
 source "drivers/param_read_write/Kconfig"
 
 source "drivers/oneplus/Kconfig"
+
+source "drivers/dts_eagle/Kconfig"
+
 endmenu

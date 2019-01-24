@@ -190,3 +190,7 @@ obj-$(CONFIG_TEE)		+= tee/
 obj-y  += param_read_write/
 
 obj-$(CONFIG_OEM_DEBUG_SUPPORT)  += oneplus/
+
+# DTS_EAGLE START
+obj-$(CONFIG_AINUR_DTS_SW) += dts_eagle/
+# DTS_EAGLE END
