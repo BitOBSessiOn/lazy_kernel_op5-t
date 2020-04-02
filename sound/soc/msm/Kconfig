@@ -236,13 +236,10 @@ config SND_SOC_MSM8998
 	select SND_SOC_WCD934X
 	select SND_SOC_WSA881X
 	select SND_SOC_MSM_HDMI_CODEC_RX
-	select DTS_SRS_TM
 	select QTI_PP
 	select SND_SOC_CPE
 	select MSM_ULTRASOUND
-	select DOLBY_LICENSE
 	select SND_HWDEP
-        select DTS_EAGLE
 	help
 	 To add support for SoC audio on MSM8998.
 	 This will enable sound soc drivers which
