@@ -225,6 +225,9 @@ static int cpu_boost_thread(void *data)
 	return 0;
 }
 
+extern int remove_underclock(void);
+extern int trigger_underclock(bool full);
+
 static int cpu_notifier_cb(struct notifier_block *nb, unsigned long action,
 			   void *data)
 {
@@ -236,7 +239,7 @@ static int cpu_notifier_cb(struct notifier_block *nb, unsigned long action,
 
 	/* Unboost when the screen is off */
 	if (test_bit(SCREEN_OFF, &b->state)) {
-		policy->min = get_min_freq(policy);
+		trigger_underclock(true);
 		sysctl_sched_energy_aware = 1;
 		return NOTIFY_OK;
 	}
@@ -276,6 +279,7 @@ static int fb_notifier_cb(struct notifier_block *nb, unsigned long action,
 	/* Boost when the screen turns on and unboost when it turns off */
 	if (*blank == FB_BLANK_UNBLANK) {
 		clear_bit(SCREEN_OFF, &b->state);
+		remove_underclock();
 		__cpu_input_boost_kick_max(b, wake_boost_duration);
 		disable_schedtune_boost(0);
 	} else {

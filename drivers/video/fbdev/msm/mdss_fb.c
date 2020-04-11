@@ -5309,6 +5309,9 @@ static bool check_not_supported_ioctl(u32 cmd)
 		(cmd == MSMFB_NOTIFY_UPDATE));
 }
 
+extern int trigger_underclock(bool full);
+extern int remove_underclock(void);
+
 /*
  * mdss_fb_do_ioctl() - MDSS Framebuffer ioctl function
  * @info:	pointer to framebuffer info
@@ -5399,8 +5402,13 @@ int mdss_fb_do_ioctl(struct fb_info *info, unsigned int cmd,
 		ret = mdss_fb_mode_switch(mfd, dsi_mode);
 		break;
 	case MSMFB_ATOMIC_COMMIT:
- 		if (time_before(jiffies, last_input_time + msecs_to_jiffies(1000)))
+ 		if (time_before(jiffies, last_input_time + msecs_to_jiffies(1000))) {
+			remove_underclock();
 			devfreq_boost_kick(DEVFREQ_MSM_CPUBW);
+		} else {
+			if (time_after(jiffies, last_input_time + msecs_to_jiffies(10000)))
+				trigger_underclock(false);
+		}
 		ret = mdss_fb_atomic_commit_ioctl(info, argp, file);
 		break;
 

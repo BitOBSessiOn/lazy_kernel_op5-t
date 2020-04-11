@@ -2567,6 +2567,154 @@ static struct notifier_block __refdata cpufreq_cpu_notifier = {
 	.notifier_call = cpufreq_cpu_callback,
 };
 
+static int lp[4] = {0,1,2,3};
+static int hp[4] = {4,5,6,7};
+static int lp_ucfreq = CONFIG_CPU_UNDERCLOCK_FREQ_LP;
+static int hp_ucfreq = CONFIG_CPU_UNDERCLOCK_FREQ_HP;
+static int boost_min_freq_lp = CONFIG_BASE_BOOST_FREQ_LP;
+static int boost_min_freq_hp = CONFIG_BASE_BOOST_FREQ_PERF;
+static int lp_lastfreq;
+static int hp_lastfreq;
+static bool full_uc;
+static bool partial_uc;
+
+module_param_named(lp_ucfreq, lp_ucfreq, int, 0644);
+module_param_named(hp_ucfreq, hp_ucfreq, int, 0644);
+
+static inline int cpufreq_underclock_check_cluster(int cpu)
+{
+	int length = 0, i = 0;
+
+	//LP
+	length = sizeof(lp) / sizeof(int);
+	for (i = 0; i < length; i++) {
+		if (lp[i] == cpu)
+			return 0;
+	}
+
+	//HP
+	length = sizeof(hp) / sizeof(int);
+	for (i = 0; i < length; i++) {
+		if (hp[i] == cpu)
+			return 1;
+	}
+
+	return -EINVAL;
+}
+
+static inline void cpufreq_underclock_set(int cluster, struct cpufreq_policy *policy,
+	bool underclock, bool full)
+{
+	if (underclock) {
+		if (lp_ucfreq == 0 || hp_ucfreq == 0)
+			return;
+
+		switch (cluster) {
+			case 0:
+				if (!partial_uc)
+					policy->min = lp_ucfreq;
+				if (full) {
+					lp_lastfreq = policy->max;
+					policy->max = boost_min_freq_lp;
+					pr_info("Fully underclocked max freq of lp cluster to %d \n", boost_min_freq_lp);
+				}
+				break;
+			case 1:
+				if (!partial_uc)
+					policy->min = hp_ucfreq;
+				if (full) {
+					hp_lastfreq = policy->max;
+					policy->max = boost_min_freq_hp;
+					pr_info("Fully underclocked max freq of hp cluster to %d \n", boost_min_freq_lp);
+				}
+				break;
+		}
+	}
+	else {
+		if (lp_lastfreq == 0 || hp_lastfreq == 0)
+			return;
+
+		switch (cluster) {
+			case 0:
+				policy->min = boost_min_freq_lp;
+				if (full) {
+					policy->max = lp_lastfreq;
+					pr_info("Reverted lp cluster to %d \n", lp_lastfreq);
+				}
+				break;
+			case 1:
+				policy->min = boost_min_freq_hp;
+				if (full) {
+					policy->max = hp_lastfreq;
+					pr_info("Reverted hp cluster to %d \n", hp_lastfreq);
+				}
+				break;
+		}
+	}
+}
+
+int remove_underclock(void)
+{
+	struct cpufreq_policy *policy;
+	bool full;
+
+	if (full_uc)
+		full = true;
+	else if (partial_uc)
+		full = false;
+	else
+		goto end;
+
+	for_each_policy(policy) {
+		cpufreq_underclock_set(cpufreq_underclock_check_cluster(policy->cpu),
+			policy, false, full);
+		cpufreq_governor(policy, CPUFREQ_GOV_STOP);
+		cpufreq_governor(policy, CPUFREQ_GOV_START);
+	}
+	pr_info("Removed cpu underclock \n");
+
+	if (full) {
+		full_uc = false;
+		if (partial_uc)
+			partial_uc = false;
+	} else
+		partial_uc = false;
+
+	end:
+		return 0;
+}
+
+int trigger_underclock(bool full)
+{
+	struct cpufreq_policy *policy;
+	bool full_t;
+
+	if (!full_uc && full)
+		full_t = true;
+	else if (!partial_uc && !full_uc && !full)
+		full_t = false;
+	else
+		goto end;
+
+	pr_info("Triggered cpu underclock \n");
+	for_each_policy(policy) {
+		cpufreq_underclock_set(cpufreq_underclock_check_cluster(policy->cpu),
+			policy, true, full_t);
+		cpufreq_governor(policy, CPUFREQ_GOV_STOP);
+		cpufreq_governor(policy, CPUFREQ_GOV_START);
+	}
+
+	if (full_t) {
+		full_uc = true;
+		if (partial_uc)
+			partial_uc = false;
+	} else
+		partial_uc = true;
+
+	end:
+		return 0;
+}
+
 /*********************************************************************
  *               BOOST						     *
  *********************************************************************/
