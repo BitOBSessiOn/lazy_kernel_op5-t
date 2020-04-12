@@ -1115,10 +1115,14 @@ int tasha_set_spkr_mode(struct snd_soc_codec *codec, int mode)
 	struct tasha_priv *priv = snd_soc_codec_get_drvdata(codec);
 	int i;
 	const struct tasha_reg_mask_val *regs;
+	int spkr_mode = SPKR_MODE_1;
 	int size;
 
 	if (!priv)
 		return -EINVAL;
+
+	/* override mode */
+	mode = spkr_mode;
 
 	switch (mode) {
 	case SPKR_MODE_1:
