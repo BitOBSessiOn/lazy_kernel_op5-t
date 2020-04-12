@@ -4131,8 +4131,11 @@ static int tasha_codec_enable_hphr_pa(struct snd_soc_dapm_widget *w,
 {
 	struct snd_soc_codec *codec = snd_soc_dapm_to_codec(w->dapm);
 	struct tasha_priv *tasha = snd_soc_codec_get_drvdata(codec);
-	int hph_mode = tasha->hph_mode;
+	int hph_mode = CLS_AB;
 	int ret = 0;
+
+	/* set hph_mode to CLS_AB */
+	tasha->hph_mode = hph_mode;
 
 	dev_dbg(codec->dev, "%s %s %d\n", __func__, w->name, event);
 
@@ -4229,8 +4232,11 @@ static int tasha_codec_enable_hphl_pa(struct snd_soc_dapm_widget *w,
 {
 	struct snd_soc_codec *codec = snd_soc_dapm_to_codec(w->dapm);
 	struct tasha_priv *tasha = snd_soc_codec_get_drvdata(codec);
-	int hph_mode = tasha->hph_mode;
+	int hph_mode = CLS_AB;
 	int ret = 0;
+
+	/* set hph_mode to CLS_AB */
+	tasha->hph_mode = hph_mode;
 
 	dev_dbg(codec->dev, "%s %s %d\n", __func__, w->name, event);
 
@@ -4613,9 +4619,12 @@ static int tasha_codec_hphr_dac_event(struct snd_soc_dapm_widget *w,
 	struct snd_soc_codec *codec = snd_soc_dapm_to_codec(w->dapm);
 	struct tasha_priv *tasha = snd_soc_codec_get_drvdata(codec);
 	struct wcd9xxx *wcd9xxx = dev_get_drvdata(codec->dev->parent);
-	int hph_mode = tasha->hph_mode;
+	int hph_mode = CLS_AB;
 	u8 dem_inp;
 	int ret = 0;
+
+	/* set hph_mode to CLS_AB */
+	tasha->hph_mode = hph_mode;
 
 	dev_dbg(codec->dev, "%s wname: %s event: %d hph_mode: %d\n", __func__,
 		w->name, event, hph_mode);
@@ -4698,10 +4707,13 @@ static int tasha_codec_hphl_dac_event(struct snd_soc_dapm_widget *w,
 	struct snd_soc_codec *codec = snd_soc_dapm_to_codec(w->dapm);
 	struct tasha_priv *tasha = snd_soc_codec_get_drvdata(codec);
 	struct wcd9xxx *wcd9xxx = dev_get_drvdata(codec->dev->parent);
-	int hph_mode = tasha->hph_mode;
+	int hph_mode = CLS_AB;
 	u8 dem_inp;
 	int ret = 0;
 	uint32_t impedl = 0, impedr = 0;
+
+	/* set hph_mode to CLS_AB */
+	tasha->hph_mode = hph_mode;
 
 	dev_dbg(codec->dev, "%s wname: %s event: %d hph_mode: %d\n", __func__,
 		w->name, event, hph_mode);
