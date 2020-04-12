@@ -3103,6 +3103,9 @@ static int msm_hifi_ctrl(struct snd_soc_codec *codec)
 	struct msm_asoc_mach_data *pdata =
 				snd_soc_card_get_drvdata(card);
 
+	/* turn on hifi function */
+	msm_hifi_control = MSM_HIFI_ON;
+
 	pr_debug("%s: msm_hifi_control = %d", __func__,
 		 msm_hifi_control);
 
