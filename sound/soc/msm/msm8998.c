@@ -3032,9 +3032,6 @@ static int msm_mi2s_rx_format_get(struct snd_kcontrol *kcontrol,
 	if (idx < 0)
 		return idx;
 
-	/* set 24bit */
-	mi2s_rx_cfg[idx].bit_format = SNDRV_PCM_FORMAT_S24_LE;
-
 	ucontrol->value.enumerated.item[0] =
 		mi2s_get_format_value(mi2s_rx_cfg[idx].bit_format);
 
