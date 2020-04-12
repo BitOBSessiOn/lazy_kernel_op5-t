@@ -976,6 +976,9 @@ static int slim_rx_bit_format_get(struct snd_kcontrol *kcontrol,
 	if (ch_num < 0)
 		return ch_num;
 
+	/* set 24bit */
+	slim_rx_cfg[ch_num].bit_format = SNDRV_PCM_FORMAT_S24_LE;
+
 	ucontrol->value.enumerated.item[0] =
 			slim_get_bit_format_val(slim_rx_cfg[ch_num].bit_format);
 
@@ -1388,6 +1391,9 @@ static int usb_audio_rx_sample_rate_put(struct snd_kcontrol *kcontrol,
 static int usb_audio_rx_format_get(struct snd_kcontrol *kcontrol,
 				   struct snd_ctl_elem_value *ucontrol)
 {
+	/* set 24bit */
+	usb_rx_cfg.bit_format = SNDRV_PCM_FORMAT_S24_LE;
+
 	switch (usb_rx_cfg.bit_format) {
 	case SNDRV_PCM_FORMAT_S32_LE:
 		ucontrol->value.integer.value[0] = 3;
@@ -1642,6 +1648,9 @@ static int ext_disp_rx_format_get(struct snd_kcontrol *kcontrol,
 
 	if (idx < 0)
 		return idx;
+
+	/* set 24bit */
+	ext_disp_rx_cfg[idx].bit_format = SNDRV_PCM_FORMAT_S24_LE;
 
 	switch (ext_disp_rx_cfg[idx].bit_format) {
 	case SNDRV_PCM_FORMAT_S24_LE:
@@ -2159,6 +2168,9 @@ static int tdm_rx_format_get(struct snd_kcontrol *kcontrol,
 		pr_err("%s: unsupported control: %s",
 			__func__, kcontrol->id.name);
 	} else {
+		/* set 24bit */
+		tdm_rx_cfg[port.mode][port.channel].bit_format = SNDRV_PCM_FORMAT_S24_LE;
+
 		ucontrol->value.enumerated.item[0] = tdm_get_format_val(
 				tdm_rx_cfg[port.mode][port.channel].bit_format);
 
@@ -3019,6 +3031,9 @@ static int msm_mi2s_rx_format_get(struct snd_kcontrol *kcontrol,
 
 	if (idx < 0)
 		return idx;
+
+	/* set 24bit */
+	mi2s_rx_cfg[idx].bit_format = SNDRV_PCM_FORMAT_S24_LE;
 
 	ucontrol->value.enumerated.item[0] =
 		mi2s_get_format_value(mi2s_rx_cfg[idx].bit_format);
