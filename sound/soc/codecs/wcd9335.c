@@ -3704,6 +3704,10 @@ static int tasha_get_compander(struct snd_kcontrol *kcontrol,
 		    kcontrol->private_value)->shift;
 	struct tasha_priv *tasha = snd_soc_codec_get_drvdata(codec);
 
+	/* Set hphr and hphl compander off */
+	tasha->comp_enabled[COMPANDER_1] = 0;
+	tasha->comp_enabled[COMPANDER_2] = 0;
+
 	ucontrol->value.integer.value[0] = tasha->comp_enabled[comp];
 	return 0;
 }
