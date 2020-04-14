@@ -5406,7 +5406,7 @@ int mdss_fb_do_ioctl(struct fb_info *info, unsigned int cmd,
 			remove_underclock();
 			devfreq_boost_kick(DEVFREQ_MSM_CPUBW);
 		} else {
-			if (time_after(jiffies, last_input_time + msecs_to_jiffies(5000)))
+			if (time_after(jiffies, last_input_time + msecs_to_jiffies(10000)))
 				trigger_underclock(false);
 		}
 		ret = mdss_fb_atomic_commit_ioctl(info, argp, file);
