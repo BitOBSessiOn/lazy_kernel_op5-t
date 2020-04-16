@@ -659,10 +659,18 @@ static ssize_t devkmsg_write(struct kiocb *iocb, struct iov_iter *from)
 			endp++;
 			len -= endp - line;
 			line = endp;
+			/* Filter healthd & dashd */
+			if (line[0] == 'h' || line[0] == 'd') {
+				for (u = 0; u < 10; ++u) {
+					if (line[u] == 'd')
+						goto free;
+				}
+			}
 		}
 	}
 
 	printk_emit(facility, level, NULL, 0, "%s", line);
+free:
 	kfree(buf);
 	return ret;
 }
@@ -2115,7 +2123,7 @@ void suspend_console(void)
 {
 	if (!console_suspend_enabled)
 		return;
-	printk("Suspending console(s) (use no_console_suspend to debug)\n");
+	pr_debug("Suspending console(s) (use no_console_suspend to debug)\n");
 	console_lock();
 	console_suspended = 1;
 	up_console_sem();
