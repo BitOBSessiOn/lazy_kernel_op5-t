@@ -735,6 +735,12 @@ static int boost_bias_write_wrapper(struct cgroup_subsys_state *css,
 	if (task_is_booster(current))
 		return 0;
 
+#ifdef CONFIG_DYNAMIC_STUNE
+	if ((!strcmp(css->cgroup->kn->name, "top-app")) || 
+		(!strcmp(css->cgroup->kn->name, "foreground")))
+		return 0;
+#endif /* CONFIG_DYNAMIC_STUNE */
+
 	return boost_bias_write(css, cft, boost_bias);
 }
 
@@ -824,8 +830,8 @@ static void write_default_values(struct cgroup_subsys_state *css)
 	static struct st_data st_targets[] = {
 		{ "audio-app",	0, 0, 0, 0 },
 		{ "background",	0, 0, 0, 0 },
-		{ "foreground",	0, 1, 0, 0 },
-		{ "rt",		0, 1, 0, 0 },
+		{ "foreground",	0, 0, 0, 0 },
+		{ "rt",		0, 0, 0, 0 },
 		{ "top-app",	0, 1, 0, 0 },
 	};
 	int i;
@@ -959,6 +965,16 @@ static struct schedtune *stune_get_by_name(char *st_name)
 	}
 
 	return NULL;
+}
+
+int do_boost_bias(char *st_name, u64 boost_bias)
+{
+	struct schedtune *st = stune_get_by_name(st_name);
+
+	if (!st)
+		return -EINVAL;
+
+	return boost_bias_write(&st->css, NULL, boost_bias);
 }
 
 int do_prefer_idle(char *st_name, u64 prefer_idle)

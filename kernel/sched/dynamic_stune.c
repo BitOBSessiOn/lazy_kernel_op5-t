@@ -43,8 +43,8 @@ static inline void set_stune(struct stune_val *stune, bool enable)
 
 	if (stune == &input) {
 		/*
-		 * Enable stune and prefer_idle with bias function in order to bias 
-		 * migrating top-app (also for foreground) tasks to idle big cluster cores.
+		 * Enable prefer_idle for both top-app and foreground when there has been
+		 * a recent interaction with the screen.
 		 */
 		do_prefer_idle("top-app", enable);
 		do_prefer_idle("foreground", enable);
@@ -53,8 +53,12 @@ static inline void set_stune(struct stune_val *stune, bool enable)
 		 * Use idle cpus with the highest original capacity for top-app when it
 		 * comes to app launches and transitions in order to speed up 
 		 * the process and efficiently consume power.
+		 * 
+		 * Let's also bias big cluster cpus for foreground when it comes to
+		 * this critical event.
 		 */
 		do_crucial("top-app", enable);
+		do_boost_bias("foreground", enable);
 	}
 }
 
