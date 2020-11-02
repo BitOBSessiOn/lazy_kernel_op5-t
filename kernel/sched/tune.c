@@ -742,15 +742,17 @@ dynamic_boost_write(struct cgroup_subsys_state *css, struct cftype *cft,
 	    s64 dynamic_boost)
 {
 	struct schedtune *st = css_st(css);
+	bool negative = dynamic_boost < 0;
 	
 	if (dynamic_boost < -100 || dynamic_boost > 100)
 		return -EINVAL;
 
 	st->dynamic_boost = dynamic_boost;
 
-	/* Update boost */
-	if (st->boost != 0 && st->boost != dynamic_boost)
-		boost_write(css, cft, dynamic_boost);
+	/* Update boost only if input dynstune is active */
+	if (st->boost > 0 && ((!negative && st->boost != dynamic_boost) || 
+		(negative && st->boost != -dynamic_boost)))
+		boost_write(css, cft, !negative ? dynamic_boost : -dynamic_boost);
 
 	return 0;
 }
@@ -895,7 +897,7 @@ static void write_default_values(struct cgroup_subsys_state *css)
 		{ "background",	0, 0, 0, 0 },
 		{ "foreground",	0, 0, 0, 0 },
 		{ "rt",		0, 0, 0, 0 },
-		{ "top-app",	0, 1, 0, 0 },
+		{ "top-app",	-5, 1, 0, 0 },
 	};
 	int i;
 
@@ -1040,12 +1042,16 @@ static struct schedtune *stune_get_by_name(char *st_name)
 int do_boost(char *st_name, bool enable)
 {
 	struct schedtune *st = stune_get_by_name(st_name);
-	s64 boost;
+	bool negative = st->dynamic_boost < 0;
+	s64 boost = 0;
 
 	if (!st)
 		return -EINVAL;
-	
-	boost = enable ? st->dynamic_boost : 0;
+
+	if (enable)
+		boost = !negative ? st->dynamic_boost : -st->dynamic_boost;
+	else if (negative)
+		boost = st->dynamic_boost;
 
 	if (st->boost == boost)
 		return 0;
