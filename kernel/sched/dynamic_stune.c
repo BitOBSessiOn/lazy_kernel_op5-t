@@ -46,6 +46,7 @@ static inline void set_stune(struct stune_val *stune, bool enable)
 		 * Enable prefer_idle for both top-app and foreground when there has been
 		 * a recent interaction with the screen.
 		 */
+		do_boost("top-app", enable);
 		do_prefer_idle("top-app", enable);
 		do_prefer_idle("foreground", enable);
 	} else {
